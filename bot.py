@@ -19,8 +19,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 
 def start(bot, update):
-    menu = telegram.ReplyKeyboardMarkup([['人民日报国际新闻'], ['读出聊天信息'], ['不读出聊天信息'], ['当前状态']])
-    bot.send_message(chat_id=update.message.chat_id, text="I'm a bot, please talk to me!", reply_markup=menu)
+    bot.send_message(chat_id=update.message.chat_id, text="I'm a bot, please talk to me!", reply_markup=top_menu)
 
 
 def echo(bot, update):
@@ -36,9 +35,37 @@ def echo(bot, update):
             status = '现在不会朗读你的消息。'
         bot.send_message(chat_id=update.message.chat_id, text=status)
     elif msg == '人民日报国际新闻':
+        # 清空缓存
+        tmp_news.clear()
         news = rmrb_news()
+        news_options.clear()
         for item in news:
-            speak(item['title'])
+            title = item['title']
+            content = item['content']
+            tmp_news[title] = content
+            news_options.append(['#'+title])
+        news_options.append(['加载更多...', '结束浏览'])
+        menu = telegram.ReplyKeyboardMarkup(news_options)
+        bot.send_message(chat_id=update.message.chat_id, text="要收听哪条新闻？", reply_markup=menu)
+    elif msg == '加载更多...':
+        offset = len(tmp_news)
+        news = rmrb_news(offset)
+        news_options.clear()
+        for item in news:
+            title = item['title']
+            content = item['content']
+            tmp_news[title] = content
+            news_options.append(['#' + title])
+        news_options.append(['加载更多...', '结束浏览'])
+        menu = telegram.ReplyKeyboardMarkup(news_options)
+        bot.send_message(chat_id=update.message.chat_id, text="要收听哪条新闻？", reply_markup=menu)
+    elif msg == '结束浏览':
+        bot.send_message(chat_id=update.message.chat_id, text="Bonne lecture !", reply_markup=top_menu)
+    elif msg[0] == '#':
+        content = tmp_news[msg[1:]]
+        menu = telegram.ReplyKeyboardMarkup(news_options)
+        bot.send_message(chat_id=update.message.chat_id, text=content, reply_markup=menu)
+        speak(content)
     else:
         if not user_silent.get(update.message.chat_id):
             speak(msg)
@@ -58,6 +85,15 @@ dispatcher.add_handler(echo_handler)
 caps_handler = CommandHandler('caps', caps, pass_args=True)
 dispatcher.add_handler(caps_handler)
 
+
+# 播放聊天信息配置
 user_silent = dict()
+# 播放新闻
+tmp_news = dict()
+news_options = []
+# 全局辅助键盘
+top_menu = telegram.ReplyKeyboardMarkup([['人民日报国际新闻'], ['读出聊天信息'], ['不读出聊天信息'], ['当前状态']])
+
+
 updater.start_polling()
 updater.idle()
