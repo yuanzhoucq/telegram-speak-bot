@@ -1,4 +1,5 @@
 import telegram
+import requests
 from src.speak import speak
 from src.rmrb import rmrb_news
 from src.data import user_silent, tmp_news, news_options, top_menu
@@ -9,6 +10,8 @@ class CommandLists:
     do_not_read_news = "不读出聊天信息"
     get_status = "当前状态"
     read_renminribao = "人民日报国际新闻"
+    turn_on_light = "开灯"
+    turn_off_light = "关灯"
 
 
 def echo(bot, update):
@@ -23,6 +26,10 @@ def echo(bot, update):
         else:
             status = '现在不会朗读你的消息。'
         bot.send_message(chat_id=update.message.chat_id, text=status)
+    elif msg == CommandLists.turn_on_light:
+        requests.get("https://maker.ifttt.com/trigger/ouvrir_l'ampoule/with/key/dV_L-I4SuFsBUNn-So3JNh")
+    elif msg == CommandLists.turn_off_light:
+        requests.get("https://maker.ifttt.com/trigger/eteindre_l'ampoule/with/key/dV_L-I4SuFsBUNn-So3JNh")
     elif msg == CommandLists.read_renminribao:
         # 清空缓存
         tmp_news.clear()

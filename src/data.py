@@ -6,4 +6,4 @@ user_silent = dict()
 tmp_news = dict()
 news_options = []
 # 全局辅助键盘
-top_menu = telegram.ReplyKeyboardMarkup([['人民日报国际新闻'], ['读出聊天信息', '不读出聊天信息'], ['当前状态']])
+top_menu = telegram.ReplyKeyboardMarkup([['人民日报国际新闻'], ['开灯', '关灯'], ['读出聊天信息', '不读出聊天信息'], ['当前状态']])
